@@ -1,6 +1,6 @@
-# BachelorThesis Filtering Project
+# Music recommender systems for beyond mainstream listeners
 
-This repository contains the code and resources for the BachelorThesis project focused on collaborative and content-based filtering techniques. The project aims to explore and implement different filtering algorithms for recommendation systems.
+This repository contains the code and resources for my Bachelor Thesis project focused on collaborative and content-based filtering techniques for beyond mainstream listeners. The project aims to explore and implement different filtering algorithms for recommendation systems.
 
 ## Project Structure
 
@@ -28,8 +28,8 @@ To run the main filtering script, navigate to the project directory and execute:
 ```shell
 python main.py [arguments]
 ```
-Replace [arguments] with the required command-line arguments for the specific filtering technique you want to apply. Use --help to see all available options.
+Replace `[arguments]` with the required command-line arguments for the specific filtering technique you want to apply. Use `--help` to see all available options.
 
 ## Configuration
 
-Edit the .ini files in the config/ directory to tweak the hyperparameters and database settings according to your needs.
+Edit the .ini files in the `config/` directory to tweak the hyperparameters and database settings according to your needs.
