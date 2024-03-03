@@ -1,6 +1,7 @@
 import argparse
 from src.models.collaborative_filtering import base_collaborative_filtering
 from src.models.collaborative_filtering_deep_learning import base_collaborative_filtering_deep_learning
+from src.models.content_based_filtering import base_content_based_filtering
 
 def main():
     parser = argparse.ArgumentParser(description='Filtering types for the project')
@@ -12,6 +13,10 @@ def main():
 
     if (args.filter_cf == '' and not args.filter_cbf):
         print("Invalid arguments. For help use --help or -h")
+        quit()
+
+    if args.filter_cbf:
+        base_content_based_filtering()
         quit()
 
     if args.filter_cf == 'KNNBasic':
