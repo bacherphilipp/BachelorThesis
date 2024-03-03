@@ -22,7 +22,7 @@ def get_data():
     print('Fetching data...')
 
     config = configparser.ConfigParser()
-    config.read('src/config/settings.ini')
+    config.read('config/settings.ini')
     data_record_limit = config.getint('general', 'data_record_limit', fallback=0)
     limit = '' if data_record_limit == 0 else ' limit ' + str(data_record_limit)
 
@@ -109,7 +109,7 @@ def evaluate_deep_learning(useritem_data):
     
     """
     config = configparser.ConfigParser()
-    config.read('src/config/hyperparameters/CBF_DL_hyperparameters.ini')
+    config.read('config/hyperparameters/CBF_DL_hyperparameters.ini')
 
     num_users = useritem_data['user_id'].nunique()  
     num_tracks = useritem_data['item_id'].nunique() 
@@ -168,7 +168,7 @@ def base_collaborative_filtering_deep_learning():
 
     """
     config = configparser.ConfigParser()
-    config.read('src/config/hyperparameters/CBF_DL_hyperparameters.ini')
+    config.read('config/hyperparameters/CBF_DL_hyperparameters.ini')
 
     tf.get_logger().setLevel(config.getint('general', 'log_level', fallback=0))
 

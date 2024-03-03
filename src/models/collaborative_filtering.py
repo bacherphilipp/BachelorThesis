@@ -17,7 +17,7 @@ def get_data():
     print('Fetching data...')
 
     config = configparser.ConfigParser()
-    config.read('src/config/settings.ini')
+    config.read('config/settings.ini')
     data_record_limit = config.getint('general', 'data_record_limit', fallback=0)
     limit = '' if data_record_limit == 0 else ' limit ' + str(data_record_limit)
 
@@ -77,7 +77,7 @@ def evaluate_KNNBasic(useritem_dataset, cbf_result_test=False):
 
     """
     config = configparser.ConfigParser()
-    config.read('src/config/hyperparameters/KNNBasic_hyperparameters.ini')
+    config.read('config/hyperparameters/KNNBasic_hyperparameters.ini')
 
     k_values = [int(x.strip()) for x in config.get('hyperparameters', 'k').split(',')]
     sim_names = [x.strip() for x in config.get('hyperparameters', 'sim_name').split(',')]
@@ -112,7 +112,7 @@ def evaluate_nmf(useritem_dataset, cbf_result_test=False):
     """
 
     config = configparser.ConfigParser()
-    config.read('src/config/hyperparameters/NMF_hyperparameters.ini')
+    config.read('config/hyperparameters/NMF_hyperparameters.ini')
 
     n_factor_values = [int(x.strip()) for x in config.get('hyperparameters', 'n_factors').split(',')]
     n_epoch_values = [int(x.strip()) for x in config.get('hyperparameters', 'n_epochs').split(',')]

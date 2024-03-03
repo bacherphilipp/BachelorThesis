@@ -4,7 +4,7 @@ from configparser import ConfigParser
 def get_db_info(section):
         parser = ConfigParser()
         try:
-            parser.read('src/config/database.ini')
+            parser.read('config/database.ini')
         except Exception as e:
             print("Error while reading database.ini:", e)
             return {}
