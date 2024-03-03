@@ -6,7 +6,7 @@ import pandas
 import numpy as np
 import configparser
 
-cursor = get_connection()
+cursor = None
 
 
 class AttributeResults:
@@ -295,6 +295,9 @@ def base_content_based_filtering():
     Returns:
 
     """
+
+    cursor = get_connection()
+
     music_data = get_music_data()
     user_data = get_user_data()
 

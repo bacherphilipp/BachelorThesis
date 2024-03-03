@@ -11,7 +11,7 @@ def main():
 
     args = parser.parse_args()
 
-    if (args.filter_cf == '' and not args.filter_cbf):
+    if (args.filter_cf is None and not args.filter_cbf):
         print("Invalid arguments. For help use --help or -h")
         quit()
 
