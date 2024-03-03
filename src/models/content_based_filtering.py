@@ -21,6 +21,13 @@ class AttributeResults:
         return f"Attributes: {self.attributes}\n Average rmse: {sum(self.rmse)/len(self.rmse) }\n Average mae: {sum(self.mae)/len(self.mae) }"
     
 def get_music_data():
+    """Retrieves music data containing track features. Can be limites via the data_record_limit setting
+
+    Parameters:
+
+    Returns:
+
+    """
     print('Fetching music data...')
     config = configparser.ConfigParser()
     config.read('config/settings.ini')
@@ -51,6 +58,13 @@ def get_music_data():
     return cursor.fetchall()
 
 def get_user_data():
+    """Retrieves user data. 100 users each (100 ms, 100 beys and 100 for each byms group)
+
+    Parameters:
+
+    Returns:
+
+    """
     print('Fetching user data...')
     cursor.execute('''WITH ranked_users AS (
                         SELECT 
@@ -96,6 +110,19 @@ def get_user_data():
     return cursor.fetchall()
 
 def prepare_data(raw_music_data, raw_user_data):
+    """Prepares the data for content based filtering. Features to be evaluated can be specified in .ini
+
+    Parameters:
+    raw_music_data (DataFrame): the music data retrieved from the DB
+    raw_user_data (DataFrame): the user data retrieved from the DB
+    
+    Returns:
+    music_data (DataFrame)
+    user_data (DataFrame)
+    column_powerset (list)
+    
+    """
+
     config = configparser.ConfigParser()
     config.read('config/hyperparameters/cbf_featureset.ini')
 
@@ -118,8 +145,16 @@ def prepare_data(raw_music_data, raw_user_data):
 
     return raw_music_data, raw_user_data, column_powerset
 
-def powerset(s):
+def powerset(attributes):
+    """Builds a powerset of item features if generate_powerset=True
 
+    Parameters:
+    attributes (list): A list of items features
+    
+    Returns:
+    (list)
+
+    """
     config = configparser.ConfigParser()
     config.read('config/hyperparameters/cbf_featureset.ini')
 
@@ -127,13 +162,25 @@ def powerset(s):
 
     if generate_powerset:
         res = [[]]
-        for e in s:
+        for e in attributes:
             res += [sub + [e] for sub in res]
         return [elem for elem in res if elem != []]
     else:
-        return [s]
+        return [attributes]
 
 def calc_mae_rmse(actual_attributes, recommended_attributes):
+    """Calculates mae and rmse. The result only  tells us how close we got in actually matching the acoustic features. It doesn't measure if the user likes the recommended item.
+
+    Parameters:
+    actual_attributes (list): list of actual item attributes
+    recommended_attributes (list): list of the recommended attributes
+    
+    Returns:
+    rmse (float)
+    mae (float)
+
+    """
+
     mae_values = []
     mse_values = []
     for _, song_row in recommended_attributes.iterrows():
@@ -147,15 +194,32 @@ def calc_mae_rmse(actual_attributes, recommended_attributes):
     return rmse, mae
 
 def calc_precision(user, recommended_songs):
+    """Calculates the precision based on songs the user has listened to + songs of artists of songs that the user has listened to. 
+
+    Parameters:
+    user (int): the users id
+    recommended_songs (list): list of songs recommended to the user
+    
+    Returns:
+    precision (float)
+
+    """
     user = str(int(user))
     tracks = ','.join(map(str, recommended_songs['track_id']))
-    #cursor.execute('select count(*) as hits from events where user_id = ' + user + ' and track_id in (' + tracks + ')' )
-    #cursor.execute('select count(distinct track_id) as hits from events where user_id = ' + user + ' and artist_id in ( select distinct artist_id from events where track_id in (' + tracks+ '))' )
     cursor.execute('select count(*) from tracks where artist_id in (select distinct artist_id from events where user_id = ' + user + ' and track_id in (' + tracks+ ')) and track_id in (' + tracks+ ')' )
     precision = cursor.fetchall()[0][0] / len(recommended_songs)
     return precision
 
 def print_eval_results(result_list):
+    """Function to print the results for the best feature combinations, sorted by precision. 
+
+    Parameters:
+    result_list (list): list of AttributeResults
+    
+    Returns:
+
+    """
+
     average_precisions = [(results, sum(results.precision) / len(results.precision)) for results in result_list]
     sorted_results = sorted(average_precisions, key=lambda x: x[1], reverse=True)
 
@@ -165,7 +229,18 @@ def print_eval_results(result_list):
         print('Average precision ' + str(res[1]) + '\n')
 
 def evaluate_content_based_filtering(music_data, user_data, column_powerset):
+    """Evaluates content based filtering using a neighbor based approach. Hyperparameters can be tuned in the .ini.
+    If you want to store the results to check them on a CF model, you can set store_to_file=True in the .ini.
 
+    Parameters:
+    music_data (DataFrame): preprocessed music data
+    user_data (DataFrame): preprocessed user data
+    column_powerset ([list]): powerset (if specified, otherwise just one list) of the feature attribues
+    
+    Returns:
+
+    """
+        
     config = configparser.ConfigParser()
     config.read('config/hyperparameters/cbf_featureset.ini')
 
