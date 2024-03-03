@@ -158,7 +158,6 @@ def evaluate_deep_learning(useritem_data):
 
     evaluate_byms_groups(model, test)
 
-
 def base_collaborative_filtering_deep_learning():
     """Entry function for collaborative filtering using deep learning.
 

@@ -145,9 +145,13 @@ def test_cbf_results(gs_model):
     Returns:
 
     """
+    config = configparser.ConfigParser()
+    config.read('config/settings.ini')
 
-    #TODO correct filepath to eval CB ratings
+    cf_cbf_result_check_records = config.getint('general','cf_cbf_result_check_records', fallback=20)
+
     file_path = 'results.txt'
+
 
     data = []
     with open(file_path, 'r') as file:
@@ -157,7 +161,7 @@ def test_cbf_results(gs_model):
 
     new_useritem_dataset = pandas.DataFrame(data)
 
-    testset = list(new_useritem_dataset[['user_id', 'item_id', 'rating']].iloc[:20].itertuples(index=False, name=None))
+    testset = list(new_useritem_dataset[['user_id', 'item_id', 'rating']].iloc[:cf_cbf_result_check_records].itertuples(index=False, name=None))
     testres = gs_model.test(testset)
     for prediction in testres:
         print(f"User: {prediction.uid}, Item: {prediction.iid}, Actual Rating: {prediction.r_ui}, Estimated Rating: {prediction.est}")
