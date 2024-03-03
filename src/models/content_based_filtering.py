@@ -296,6 +296,7 @@ def base_content_based_filtering():
 
     """
 
+    global cursor
     cursor = get_connection()
 
     music_data = get_music_data()
