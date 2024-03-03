@@ -1,1 +1,8 @@
-xxx
+joblib==1.3.1
+numpy==1.24.3
+pandas==2.0.3
+psycopg2==2.9.6
+scikit_learn==1.3.0
+scikit_surprise==1.1.3
+tensorflow==2.13.1
+tensorflow_intel==2.13.1
