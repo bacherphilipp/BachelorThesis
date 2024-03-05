@@ -5,6 +5,7 @@ from sklearn.preprocessing import MinMaxScaler
 import pandas
 import numpy as np
 import configparser
+import os
 
 cursor = None
 
@@ -251,6 +252,12 @@ def evaluate_content_based_filtering(music_data, user_data, column_powerset):
 
     results_list = list()
     len_powerset = len(column_powerset)
+    
+    f = None
+    if store_to_file:
+        if os.path.exists('results.txt'):
+            os.remove('results.txt')
+        f = open('results.txt', 'a')
 
     for count, attribute_columns in enumerate(column_powerset):
         print('Evaluating for attributes: ' + ', '.join(attribute_columns))
@@ -276,13 +283,14 @@ def evaluate_content_based_filtering(music_data, user_data, column_powerset):
             p=calc_precision(user_row['user_id'], recommended_songs[['track_id']])
 
             if store_to_file:
-                f = open("results.txt", "a")
                 for track_id in recommended_songs['track_id']:
                     f.write(str(int(user_row['user_id'])) + ' ' + str(track_id) + '\n')
-                f.close()
-
+                
             attribute_results.precision.append(p)
         results_list.append(attribute_results)
+
+    if store_to_file:
+        f.close()
 
     print_eval_results(results_list)
 
