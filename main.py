@@ -17,6 +17,8 @@ def main():
 
     if args.filter_cbf:
         base_content_based_filtering()
+        if args.cbf_result:
+            base_collaborative_filtering('KNNBasic', args.cbf_result)
         quit()
 
     if args.filter_cf == 'KNNBasic':

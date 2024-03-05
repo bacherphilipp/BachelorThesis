@@ -127,7 +127,7 @@ def evaluate_nmf(useritem_dataset, cbf_result_test=False):
     }
 
     print("Starting NMF hyperparametertuning...")
-    gs = CustomGridSearchCV(NMF, param_grid, measures= ["rmse", "mae"], cv=5, n_jobs=-1)
+    gs = CustomGridSearchCV(NMF, param_grid, measures= ["rmse", "mae"], cv=5, n_jobs=-1, refit=True)
     gs.fit(useritem_dataset)
 
 
@@ -163,9 +163,32 @@ def test_cbf_results(gs_model):
 
     testset = list(new_useritem_dataset[['user_id', 'item_id', 'rating']].iloc[:cf_cbf_result_check_records].itertuples(index=False, name=None))
     testres = gs_model.test(testset)
-    for prediction in testres:
-        print(f"User: {prediction.uid}, Item: {prediction.iid}, Actual Rating: {prediction.r_ui}, Estimated Rating: {prediction.est}")
+    # for prediction in testres:
+    #     print(f"User: {prediction.uid}, Item: {prediction.iid}, Actual Rating: {prediction.r_ui}, Estimated Rating: {prediction.est}")
 
+    average_estimated_rating = sum(prediction.est for prediction in testres) / len(testres)
+    print(f"Average rating for all: {average_estimated_rating}")
+
+    batch_averages = calculate_averages(testres, 100, 100)
+    print(batch_averages)
+
+def calculate_averages(predictions, batch_size=100, batch_size_items=100):
+    """Calculates the average ratings per user group, generated using the CBF results in results.txt
+
+    Parameters:
+    predictions (DataFrame): the predictions generated from the CF model using the predicted CBF items
+    batch_size (int): specify how many users are in each usergroup
+    batch_size_items (int): specify how many items each user has
+
+    Returns:
+    averages (list)
+    """
+    averages = []
+    for i in range(0, len(predictions), batch_size * batch_size_items):
+        batch = predictions[i:i + batch_size * batch_size_items]
+        first_ratings = [batch[i].est for i in range(0, len(batch), 1)]
+        averages.append(sum(first_ratings) / (batch_size * batch_size_items))
+    return averages
 
 def base_collaborative_filtering(mode, cbf_eval = False):
     """Entry function for collaborative filtering.
