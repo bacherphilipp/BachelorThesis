@@ -1,9 +1,11 @@
+from models.helpers.recommended_hypermodel import RecommenderHyperModel
 from src.data_retrieval.dbconnect import get_connection
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.layers import Input, Embedding, Flatten, Dot, Dense, Concatenate
 from tensorflow.keras.models import Model
 from sklearn.metrics import mean_squared_error, mean_absolute_error
+from kerastuner.tuners import RandomSearch
 import tensorflow as tf
 from math import sqrt
 import numpy as np
@@ -119,7 +121,6 @@ def evaluate_deep_learning(useritem_data):
     user_input = Input(shape=(1,), name='user_input')
     track_input = Input(shape=(1,), name='track_input')
 
-
     embedding_size = config.getint('hyperparameters', 'embedding_size', fallback=50 )
 
     user_embedding = Embedding(input_dim=num_users, output_dim=embedding_size, name='user_embedding')(user_input)
@@ -130,13 +131,14 @@ def evaluate_deep_learning(useritem_data):
 
     concat = Concatenate()([user_vector, track_vector])
 
+    dense = Dense(256, activation='relu')(concat)
     dense = Dense(128, activation='relu')(concat)
     dense = Dense(64, activation='relu')(dense)
     dense = Dense(32, activation='relu')(dense)
     output = Dense(1, activation='linear')(dense) 
 
     model = Model(inputs=[user_input, track_input], outputs=output)
-    model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae', 'accuracy']) 
+    model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae']) 
 
     X_train = [train.user_id, train.item_id]
     y_train = train.rating
@@ -158,7 +160,32 @@ def evaluate_deep_learning(useritem_data):
 
     evaluate_byms_groups(model, test)
 
-def base_collaborative_filtering_deep_learning():
+def evaluate_deep_learning_hypermodel(useritem_data):
+    num_users = useritem_data['user_id'].nunique()  
+    num_tracks = useritem_data['item_id'].nunique() 
+
+    hypermodel = RecommenderHyperModel(num_users, num_tracks)
+
+    train, test = train_test_split(useritem_data, test_size=0.2, random_state=42)
+    
+    X_train = [train.user_id, train.item_id]
+    y_train = train.rating
+    X_test = [test.user_id, test.item_id]
+    y_test = test.rating
+
+    tuner = RandomSearch(
+        hypermodel,
+        objective='val_mae',
+        max_trials=30,
+        executions_per_trial=1,
+        directory='tuner_results',
+        project_name='recommender'
+    )
+
+    tuner.search(x=X_train, y=y_train, epochs=20, validation_data=(X_test, y_test),callbacks=[tf.keras.callbacks.EarlyStopping('val_loss', patience=3)])
+
+
+def base_collaborative_filtering_deep_learning(use_tuner):
     """Entry function for collaborative filtering using deep learning.
 
     Parameters:
@@ -175,6 +202,10 @@ def base_collaborative_filtering_deep_learning():
     raw_data = pandas.DataFrame(data, columns=['user_id', 'item_id', 'rating', 'usergroup', 'isbyms' ])
 
     useritem_data = prepare_data(raw_data)
-    evaluate_deep_learning(useritem_data)
+    if use_tuner:
+        evaluate_deep_learning_hypermodel(raw_data)
+    else:
+        evaluate_deep_learning(useritem_data)
+    
 
 

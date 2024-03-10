@@ -7,6 +7,7 @@ def main():
     parser = argparse.ArgumentParser(description='Filtering types for the project')
     parser.add_argument('--filter_cf', help='Type of collaborative filtering to perform (KNNBasic/NMF,DL)', required=False)
     parser.add_argument('--cbf_result', action='store_true', help='Enable checking of CBF results', required=False)
+    parser.add_argument('--tune_dl', action='store_true', help='Enable hyperparamertuning mode for the DL model', required=False)
     parser.add_argument('--filter_cbf', action='store_true', help='Content based filtering if specified', required=False)
 
     args = parser.parse_args()
@@ -26,7 +27,7 @@ def main():
     elif args.filter_cf == 'NMF':
         base_collaborative_filtering('NMF', args.cbf_result)
     elif args.filter_cf == 'DL':
-        base_collaborative_filtering_deep_learning()
+        base_collaborative_filtering_deep_learning(args.tune_dl)
     else:
         print('Invalid collaborative filtering mode. For help use --help or -h')
         quit()
