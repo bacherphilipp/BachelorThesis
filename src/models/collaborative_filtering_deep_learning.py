@@ -1,4 +1,4 @@
-from models.helpers.recommended_hypermodel import RecommenderHyperModel
+from src.models.helpers.recommended_hypermodel import RecommenderHyperModel
 from src.data_retrieval.dbconnect import get_connection
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split

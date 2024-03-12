@@ -164,12 +164,13 @@ def test_cbf_results(gs_model):
     testset = list(new_useritem_dataset[['user_id', 'item_id', 'rating']].iloc[:cf_cbf_result_check_records].itertuples(index=False, name=None))
     testres = gs_model.test(testset)
     # for prediction in testres:
-    #     print(f"User: {prediction.uid}, Item: {prediction.iid}, Actual Rating: {prediction.r_ui}, Estimated Rating: {prediction.est}")
+    #      print(f"User: {prediction.uid}, Item: {prediction.iid}, Actual Rating: {prediction.r_ui}, Estimated Rating: {prediction.est}")
 
     average_estimated_rating = sum(prediction.est for prediction in testres) / len(testres)
     print(f"Average rating for all: {average_estimated_rating}")
 
-    batch_averages = calculate_averages(testres, 100, 100)
+    batch_averages, liked_recommendations = calculate_averages(testres, 100, 100)
+    print(liked_recommendations)
     print(batch_averages)
 
 def calculate_averages(predictions, batch_size=100, batch_size_items=100):
@@ -184,11 +185,13 @@ def calculate_averages(predictions, batch_size=100, batch_size_items=100):
     averages (list)
     """
     averages = []
+    liked_recommendations = []
     for i in range(0, len(predictions), batch_size * batch_size_items):
         batch = predictions[i:i + batch_size * batch_size_items]
         first_ratings = [batch[i].est for i in range(0, len(batch), 1)]
+        liked_recommendations.append(sum(1 for item  in first_ratings if item >= 500))
         averages.append(sum(first_ratings) / (batch_size * batch_size_items))
-    return averages
+    return averages, liked_recommendations
 
 def base_collaborative_filtering(mode, cbf_eval = False):
     """Entry function for collaborative filtering.
