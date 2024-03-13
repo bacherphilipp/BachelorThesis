@@ -132,7 +132,7 @@ def evaluate_deep_learning(useritem_data):
     concat = Concatenate()([user_vector, track_vector])
 
     dense = Dense(256, activation='relu')(concat)
-    dense = Dense(128, activation='relu')(concat)
+    dense = Dense(128, activation='relu')(dense)
     dense = Dense(64, activation='relu')(dense)
     dense = Dense(32, activation='relu')(dense)
     output = Dense(1, activation='linear')(dense) 
