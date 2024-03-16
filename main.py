@@ -11,7 +11,7 @@ def main():
     parser.add_argument('--filter_cf', help='Type of collaborative filtering to perform (KNNBasic/NMF,DL)', required=False)
     parser.add_argument('--cbf_result', action='store_true', help='Enable checking of CBF results', required=False)
     parser.add_argument('--tune_dl', action='store_true', help='Enable hyperparamertuning mode for the DL model', required=False)
-    parser.add_argument('--filter_cbf', help='Content based filtering if specified. Can be traditional or deep learning (TRAD, DL)', required=False)
+    parser.add_argument('--filter_cbf', help='Content based filtering if specified. Can be traditional or deep learning (TRAD, DL->not working at the moment)', required=False)
     parser.add_argument('--init_user_profile', action='store_true', help='Initializes generation of user profiles for content based deep learning and prints them', required=False)
     parser.add_argument('--filter_hybrid', action='store_true', help='Hybrid deep learning based filtering', required=False)
 
