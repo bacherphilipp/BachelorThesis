@@ -41,6 +41,13 @@ def get_music_data():
     return cursor.fetchall()
 
 def prepare_data():
+    """Prepares the data to be used by the hybrid filtering model. 
+
+    Parameters:
+
+    Returns:
+    
+    """
     generator = UserGenreProfileGenerator()
     user_profile = generator.build_profile(False)
     user_profile_matrix = user_profile.pivot(index='user_id', columns='genres', values='normalized_rating').fillna(0).reset_index()
@@ -65,6 +72,15 @@ def prepare_data():
     return user_profile_matrix, song_genre_matrix
 
 def create_metadata_df(df, feature_columns, embedding_columns):
+    """Creates a dataframe containing the user/item metadata
+
+    Parameters:
+    feature_columns: list of column names that contain single features values
+    embedding_columns: list of column names that contain vector embeddings
+
+    Returns:
+    metadata DataFrame
+    """
     features = df[feature_columns].reset_index(drop=True)
     embeddings = pd.DataFrame()
     for column in embedding_columns:
@@ -73,7 +89,18 @@ def create_metadata_df(df, feature_columns, embedding_columns):
     return result
 
 def hybrid_recommender_v1(n_item_features, n_user_features, embedding_size, n_users, n_items):
+    """Creates the deep learning model used for the hybrid filtering
 
+    Parameters:
+    n_item_features: Number of item features
+    n_user_features: Number of user features
+    embedding_size: Embedding size for the model
+    n_users: Number of users in the dataset
+    n_items: Number of items in the dataset
+
+    Returns:
+    The compiled model
+    """
     user_id_input = Input(shape=[1], name='user')
     item_id_input = Input(shape=[1], name='item')
     item_meta_input = Input(shape=[n_item_features], name='item_features')
@@ -154,6 +181,16 @@ def evaluate_byms_groups(model, test_data, genres_user, genres_track):
                 print(f'No data to predict for group {group_name}')  
 
 def prepare_model(ratings, users, items):
+    """Prepares the training data for the model and fits it
+
+    Parameters:
+    ratings: The user-item interaction rating DataFrame
+    users: The user DataFrame including the user profile
+    items: The item DataFrame including tracks and genre information
+
+    Returns:
+    
+    """
     users.rename(columns={col: f'user_{col}' for col in users.columns if col not in ['genres', 'user_id']}, inplace=True)
     ratings = ratings[ratings['track_id'].isin(items['track_id'])]
     ratings = ratings[ratings['user_id'].isin(users['user_id'])]
@@ -205,7 +242,13 @@ def prepare_model(ratings, users, items):
     evaluate_byms_groups(model, test, cols_except_genres_userid, cols_except_genres_trackid)
 
 def base_hybrid_filtering_deep_learning():
+    """Entry function for hybrid filtering using deep learning.
 
+    Parameters:
+
+    Returns:
+
+    """
     generator = UserGenreProfileGenerator()
     ratings = generator.get_data(False)
     ratings = pd.DataFrame(ratings, columns=['user_id', 'track_id', 'rating', 'usergroup', 'isbyms', 'genres' ])
