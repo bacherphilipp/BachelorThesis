@@ -64,54 +64,7 @@ def prepare_data():
 
     return user_profile_matrix, song_genre_matrix
 
-def one_hot_encode(df, columns):
-    ohe = OneHotEncoder()
-    ohe_features = pd.DataFrame(ohe.fit_transform(df[columns]).toarray())
-    ohe_features.columns = ohe.get_feature_names()
-    df = pd.concat([df, ohe_features], axis=1)
-    df = df.drop(columns = categorical_features)
-    return df
 
-
-# df: dataframe containing features to be encoded
-# columns: list of columns to be encoded
-def label_encode(df, columns):
-    le = LabelEncoder()
-    df[columns] = df[columns].apply(le.fit_transform)
-    return df
-
-
-# df: dataframe containing text to be vectorized
-# column: string name of text column
-# vectorizer: scikit learn vectorizer - CountVectorizer or TfidfVectorizer
-def vectorize_text(df, column, vectorizer):
-    text = df[column].replace(np.nan, ' ').tolist()
-    X = vectorizer.fit_transform(text)
-    df[column+'_features'] = list(X.toarray())
-#     word_vecs = pd.DataFrame(X.toarray())
-    df.drop(columns=column, inplace=True)
-#     df = pd.concat([df, word_vecs], axis = 1)
-    return df
-
-
-# vectorizes columns that include a list that should be broken out into one-hot-encoded features
-# for example, a column containing lists like ["red", "green", "blue"] will be transformed into 3 columns with 0/1 indicators
-# df: dataframe containing column to be vectorized
-# column: column containing list of features
-def vectorize_columns(df, columns):
-    for column in columns:
-        df[column] = df[column].fillna('[]')
-        df[column] = df[column].apply(lambda x: x.strip('][').split(', '))
-        features = df[column].apply(frozenset).to_frame(name='features')
-        for feature in frozenset.union(*features.features):
-            new_col = feature.strip('\'').lower()
-            df[new_col] = features.apply(lambda _: int(feature in _.features), axis=1)
-        df = df.drop(columns = [column])
-    return df
-
-
-# feature_columns: list of column names that contain single features values
-# embedding_columns: list of column names that contain vector embeddings (image or text embeddings)
 def create_metadata_df(df, feature_columns, embedding_columns):
     features = df[feature_columns].reset_index(drop=True)
     embeddings = pd.DataFrame()
@@ -121,7 +74,6 @@ def create_metadata_df(df, feature_columns, embedding_columns):
     return result
 
 
-# recommender with only user-item ratings and no user-item features
 def create_basic_network(n_items, n_users, n_factors):
     item_input = Input(shape=[1], name="Item-Input")
     item_embedding = Embedding(n_items, n_factors, name="Item-Embedding")(item_input)
@@ -143,41 +95,9 @@ def base_hybrid_filtering_deep_learning():
     generator = UserGenreProfileGenerator()
     ratings = generator.get_data(False)
     ratings = pd.DataFrame(ratings, columns=['user_id', 'track_id', 'rating', 'usergroup', 'isbyms', 'genres' ])
-    #ratings =  ratings[['user_id', 'track_id', 'rating']]
-    #print(ratings.columns.values)
-    #print(ratings)
-# items_file = 'path to csv with schema: item_id, item_feature1, item_feature2, ..., item_featureN' 
-
-# items = pd.read_csv(items_file)
-# items = items[['item_id','color','category','item_gender','description']]  # sample columns in our dataset
-
-
-# user_file = 'path to csv with schema: user_id, user_feature1, user_feature2, ..., user_featureN' 
-# users = pd.read_csv(user_file)
-# users = users[['user_id','user_gender','colors','user_description']]  # sample columns in our dataset
 
     users, items = prepare_data()
     users.rename(columns={col: f'user_{col}' for col in users.columns if col not in ['genres', 'user_id']}, inplace=True)
-    #print(users)
-    #print(items)
-# encode item categorical features from strings to ints
-# item_cat_features = ['color', 'category', 'item_gender']  # TODO: replace with your categorical string features
-# items = label_encode(items, item_cat_features)
-
-# vectorize item text descriptions
-#tf_vectorizer = TfidfVectorizer()
-#items = vectorize_text(items, 'description', tf_vectorizer) 
-
-# encode user categorical features
-#user_cat_features = ['user_gender']  # TODO: replace with your categorical string features
-#users = label_encode(users, user_cat_features)
-
-# vectorize user features - split lists into one hot encoded columns
-#users = vectorize_columns(users, ['colors']) # sample column that contains lists in our dataset, e.g. ['blue', 'purple']
-
-# if there is text associated with the user, vectorize it here (like a user request, profile description, or other)
-#users = vectorize_text(users, 'user_description', tf_vectorizer)
-    
 
 
     ratings = ratings[ratings['track_id'].isin(items['track_id'])]
