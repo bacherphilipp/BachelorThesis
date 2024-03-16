@@ -161,6 +161,15 @@ def evaluate_deep_learning(useritem_data):
     evaluate_byms_groups(model, test)
 
 def evaluate_deep_learning_hypermodel(useritem_data):
+    """Evaluates the deep learning model with the using a RandomSearch to try various hyperparameters
+
+    Parameters:
+    useritem_data (DataFrame): The useritem relation dataset used to train the model
+
+    Returns:
+
+    """
+
     num_users = useritem_data['user_id'].nunique()  
     num_tracks = useritem_data['item_id'].nunique() 
 
